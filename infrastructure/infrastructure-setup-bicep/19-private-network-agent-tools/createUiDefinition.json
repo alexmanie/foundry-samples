@@ -118,7 +118,7 @@
             "name": "vnetMode",
             "type": "Microsoft.Common.OptionsGroup",
             "label": "Virtual Network",
-            "defaultValue": "Create new",
+            "defaultValue": "new",
             "toolTip": "Create a brand-new VNet, or use an existing one (recommended for shared/enterprise environments).",
             "constraints": {
               "required": true,
@@ -179,9 +179,6 @@
               "subnets": "Subnets"
             },
             "visible": "[equals(steps('network').vnetMode, 'existing')]",
-            "scope": {
-              "subscriptionId": "[subscription().subscriptionId]"
-            },
             "subnets": {
               "agentSubnet": {
                 "label": "Agent subnet",
@@ -279,9 +276,9 @@
       "existingPeSubnetResourceId":     "[if(equals(steps('network').vnetMode, 'existing'), steps('network').existingVnet.subnets.peSubnet.id,      '')]",
       "existingMcpSubnetResourceId":    "[if(equals(steps('network').vnetMode, 'existing'), steps('network').existingVnet.subnets.mcpSubnet.id,     '')]",
 
-      "existingAiSearchResourceId":             "[coalesce(steps('byo').aiSearch.id, '')]",
-      "existingAzureCosmosDBAccountResourceId": "[coalesce(steps('byo').cosmos.id,   '')]",
-      "existingAzureStorageAccountResourceId":  "[coalesce(steps('byo').storage.id,  '')]",
+      "existingAiSearchResourceId":             "[if(empty(steps('byo').aiSearch), '', steps('byo').aiSearch.id)]",
+      "existingAzureCosmosDBAccountResourceId": "[if(empty(steps('byo').cosmos), '', steps('byo').cosmos.id)]",
+      "existingAzureStorageAccountResourceId":  "[if(empty(steps('byo').storage), '', steps('byo').storage.id)]",
       "existingFabricWorkspaceResourceId":      "[steps('byo').fabric]"
     }
   }
