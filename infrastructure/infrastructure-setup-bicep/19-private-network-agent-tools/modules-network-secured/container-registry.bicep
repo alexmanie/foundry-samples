@@ -3,9 +3,8 @@ Azure Container Registry with Private Endpoint Module
 ------------------------------------------------------
 This module creates an Azure Container Registry (Premium SKU) with:
 1. Private Endpoint in the specified PE subnet
-2. Private DNS Zone (privatelink.azurecr.io) — created or referenced from existing
-3. VNet link for the DNS zone
-4. DNS Zone Group for the Private Endpoint
+2. Private DNS Zone reference (privatelink.azurecr.io)
+3. DNS Zone Group for the Private Endpoint
 
 Prerequisites:
 - Premium SKU is required for Private Endpoint support
@@ -20,12 +19,6 @@ param location string
 
 @description('Resource ID of the Private Endpoint subnet')
 param peSubnetId string
-
-@description('Resource ID of the Virtual Network')
-param vnetId string
-
-@description('Suffix for unique resource names')
-param suffix string
 
 @description('Resource group name for existing ACR DNS zone. Empty string means create a new zone.')
 param existingDnsZoneResourceGroup string = ''
@@ -80,12 +73,11 @@ resource acrPrivateEndpoint 'Microsoft.Network/privateEndpoints@2024-05-01' = {
   }
 }
 
-// ---- Private DNS Zone ----
+// ---- Private DNS Zone (reference only) ----
 var acrDnsZoneName = 'privatelink.azurecr.io'
 
-resource acrPrivateDnsZone 'Microsoft.Network/privateDnsZones@2020-06-01' = if (empty(existingDnsZoneResourceGroup)) {
+resource acrPrivateDnsZone 'Microsoft.Network/privateDnsZones@2020-06-01' existing = if (empty(existingDnsZoneResourceGroup)) {
   name: acrDnsZoneName
-  location: 'global'
 }
 
 resource existingAcrPrivateDnsZone 'Microsoft.Network/privateDnsZones@2020-06-01' existing = if (!empty(existingDnsZoneResourceGroup)) {
@@ -94,17 +86,6 @@ resource existingAcrPrivateDnsZone 'Microsoft.Network/privateDnsZones@2020-06-01
 }
 
 var acrDnsZoneId = empty(existingDnsZoneResourceGroup) ? acrPrivateDnsZone.id : existingAcrPrivateDnsZone.id
-
-// ---- VNet Link ----
-resource acrDnsVnetLink 'Microsoft.Network/privateDnsZones/virtualNetworkLinks@2024-06-01' = if (empty(existingDnsZoneResourceGroup)) {
-  parent: acrPrivateDnsZone
-  location: 'global'
-  name: 'acr-${suffix}-link'
-  properties: {
-    virtualNetwork: { id: vnetId }
-    registrationEnabled: false
-  }
-}
 
 // ---- DNS Zone Group ----
 resource acrDnsGroup 'Microsoft.Network/privateEndpoints/privateDnsZoneGroups@2024-05-01' = {
@@ -115,9 +96,6 @@ resource acrDnsGroup 'Microsoft.Network/privateEndpoints/privateDnsZoneGroups@20
       { name: '${acrName}-dns-config', properties: { privateDnsZoneId: acrDnsZoneId } }
     ]
   }
-  dependsOn: [
-    empty(existingDnsZoneResourceGroup) ? acrDnsVnetLink : null
-  ]
 }
 
 // ---- AcrPull Role Assignment ----
