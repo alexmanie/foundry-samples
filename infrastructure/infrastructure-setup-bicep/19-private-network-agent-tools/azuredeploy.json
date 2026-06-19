@@ -255,7 +255,7 @@
           "subscriptionId": "",
           "resourceGroup": ""
         },
-        "[format('privatelink.blob.{0}', environment().suffixes.storage)]": {
+        "privatelink.blob.core.windows.net": {
           "subscriptionId": "",
           "resourceGroup": ""
         },
@@ -2262,12 +2262,6 @@
           "peSubnetId": {
             "value": "[reference(resourceId('Microsoft.Resources/deployments', format('vnet-{0}-{1}-deployment', variables('trimVnetName'), variables('uniqueSuffix'))), '2025-04-01').outputs.peSubnetId.value]"
           },
-          "vnetId": {
-            "value": "[reference(resourceId('Microsoft.Resources/deployments', format('vnet-{0}-{1}-deployment', variables('trimVnetName'), variables('uniqueSuffix'))), '2025-04-01').outputs.virtualNetworkId.value]"
-          },
-          "suffix": {
-            "value": "[variables('uniqueSuffix')]"
-          },
           "existingDnsZoneResourceGroup": {
             "value": "[parameters('existingDnsZones')['privatelink.azurecr.io'].resourceGroup]"
           },
@@ -2306,18 +2300,6 @@
               "type": "string",
               "metadata": {
                 "description": "Resource ID of the Private Endpoint subnet"
-              }
-            },
-            "vnetId": {
-              "type": "string",
-              "metadata": {
-                "description": "Resource ID of the Virtual Network"
-              }
-            },
-            "suffix": {
-              "type": "string",
-              "metadata": {
-                "description": "Suffix for unique resource names"
               }
             },
             "existingDnsZoneResourceGroup": {
@@ -2403,22 +2385,6 @@
               "location": "global"
             },
             {
-              "condition": "[empty(parameters('existingDnsZoneResourceGroup'))]",
-              "type": "Microsoft.Network/privateDnsZones/virtualNetworkLinks",
-              "apiVersion": "2024-06-01",
-              "name": "[format('{0}/{1}', variables('acrDnsZoneName'), format('acr-{0}-link', parameters('suffix')))]",
-              "location": "global",
-              "properties": {
-                "virtualNetwork": {
-                  "id": "[parameters('vnetId')]"
-                },
-                "registrationEnabled": false
-              },
-              "dependsOn": [
-                "[resourceId('Microsoft.Network/privateDnsZones', variables('acrDnsZoneName'))]"
-              ]
-            },
-            {
               "type": "Microsoft.Network/privateEndpoints/privateDnsZoneGroups",
               "apiVersion": "2024-05-01",
               "name": "[format('{0}/{1}', format('{0}-private-endpoint', parameters('acrName')), format('{0}-dns-group', parameters('acrName')))]",
@@ -2433,7 +2399,6 @@
                 ]
               },
               "dependsOn": [
-                "[resourceId('Microsoft.Network/privateDnsZones/virtualNetworkLinks', variables('acrDnsZoneName'), format('acr-{0}-link', parameters('suffix')))]",
                 "[resourceId('Microsoft.Network/privateDnsZones', variables('acrDnsZoneName'))]",
                 "[resourceId('Microsoft.Network/privateEndpoints', format('{0}-private-endpoint', parameters('acrName')))]"
               ]
