@@ -70,12 +70,12 @@
             "name": "modelName",
             "type": "Microsoft.Common.DropDown",
             "label": "Model",
-            "defaultValue": "gpt-4o-mini",
+            "defaultValue": "gpt-4.1-mini",
             "constraints": {
               "required": true,
               "allowedValues": [
-                { "label": "gpt-4o-mini", "value": "gpt-4o-mini" },
-                { "label": "gpt-4o",      "value": "gpt-4o" },
+                { "label": "gpt-4.1-mini", "value": "gpt-4.1-mini" },
+                { "label": "gpt-4.1",      "value": "gpt-4.1" },
                 { "label": "gpt-4",       "value": "gpt-4" }
               ]
             }
@@ -84,7 +84,7 @@
             "name": "modelVersion",
             "type": "Microsoft.Common.TextBox",
             "label": "Model version",
-            "defaultValue": "2024-07-18",
+            "defaultValue": "2025-04-14",
             "toolTip": "API version of the selected model."
           },
           {
@@ -172,35 +172,51 @@
           },
 
           {
-            "name": "existingVnet",
-            "type": "Microsoft.Network.VirtualNetworkCombo",
-            "label": {
-              "virtualNetwork": "Existing VNet",
-              "subnets": "Subnets"
-            },
+            "name": "existingVnetResourceIdInput",
+            "type": "Microsoft.Common.TextBox",
+            "label": "Existing VNet ARM resource ID",
             "visible": "[equals(steps('network').vnetMode, 'existing')]",
-            "subnets": {
-              "agentSubnet": {
-                "label": "Agent subnet",
-                "constraints": { "minAddressCount": 32, "requireContiguousAddresses": true }
-              },
-              "peSubnet": {
-                "label": "Private-endpoint subnet",
-                "constraints": { "minAddressCount": 32, "requireContiguousAddresses": true }
-              },
-              "mcpSubnet": {
-                "label": "MCP subnet",
-                "constraints": { "minAddressCount": 32, "requireContiguousAddresses": true }
-              }
+            "toolTip": "Example: /subscriptions/<subId>/resourceGroups/<rg>/providers/Microsoft.Network/virtualNetworks/<vnetName>",
+            "constraints": {
+              "required": true,
+              "regex": "^/subscriptions/[^/]+/resourceGroups/[^/]+/providers/Microsoft\\.Network/virtualNetworks/[^/]+$",
+              "validationMessage": "Enter a valid VNet ARM resource ID."
             }
           },
           {
-            "name": "existingSubnetReuseInfo",
-            "type": "Microsoft.Common.InfoBox",
+            "name": "existingAgentSubnetResourceIdInput",
+            "type": "Microsoft.Common.TextBox",
+            "label": "Existing agent subnet ARM resource ID",
             "visible": "[equals(steps('network').vnetMode, 'existing')]",
-            "options": {
-              "icon": "Info",
-              "text": "When using an existing VNet, the subnets you select above will be referenced as-is. Their existing NSGs, route tables, and delegations are preserved."
+            "toolTip": "Example: /subscriptions/<subId>/resourceGroups/<rg>/providers/Microsoft.Network/virtualNetworks/<vnetName>/subnets/<subnetName>",
+            "constraints": {
+              "required": true,
+              "regex": "^/subscriptions/[^/]+/resourceGroups/[^/]+/providers/Microsoft\\.Network/virtualNetworks/[^/]+/subnets/[^/]+$",
+              "validationMessage": "Enter a valid subnet ARM resource ID."
+            }
+          },
+          {
+            "name": "existingPeSubnetResourceIdInput",
+            "type": "Microsoft.Common.TextBox",
+            "label": "Existing private-endpoint subnet ARM resource ID",
+            "visible": "[equals(steps('network').vnetMode, 'existing')]",
+            "toolTip": "Example: /subscriptions/<subId>/resourceGroups/<rg>/providers/Microsoft.Network/virtualNetworks/<vnetName>/subnets/<subnetName>",
+            "constraints": {
+              "required": true,
+              "regex": "^/subscriptions/[^/]+/resourceGroups/[^/]+/providers/Microsoft\\.Network/virtualNetworks/[^/]+/subnets/[^/]+$",
+              "validationMessage": "Enter a valid subnet ARM resource ID."
+            }
+          },
+          {
+            "name": "existingMcpSubnetResourceIdInput",
+            "type": "Microsoft.Common.TextBox",
+            "label": "Existing MCP subnet ARM resource ID",
+            "visible": "[equals(steps('network').vnetMode, 'existing')]",
+            "toolTip": "Example: /subscriptions/<subId>/resourceGroups/<rg>/providers/Microsoft.Network/virtualNetworks/<vnetName>/subnets/<subnetName>",
+            "constraints": {
+              "required": true,
+              "regex": "^/subscriptions/[^/]+/resourceGroups/[^/]+/providers/Microsoft\\.Network/virtualNetworks/[^/]+/subnets/[^/]+$",
+              "validationMessage": "Enter a valid subnet ARM resource ID."
             }
           }
         ]
@@ -268,10 +284,10 @@
       "peSubnetPrefix":     "[if(equals(steps('network').vnetMode, 'new'), steps('network').newPeSubnetPrefix, '')]",
       "mcpSubnetPrefix":    "[if(equals(steps('network').vnetMode, 'new'), steps('network').newMcpSubnetPrefix, '')]",
 
-      "existingVnetResourceId":         "[if(equals(steps('network').vnetMode, 'existing'), steps('network').existingVnet.virtualNetwork.id,        '')]",
-      "existingAgentSubnetResourceId":  "[if(equals(steps('network').vnetMode, 'existing'), steps('network').existingVnet.subnets.agentSubnet.id,   '')]",
-      "existingPeSubnetResourceId":     "[if(equals(steps('network').vnetMode, 'existing'), steps('network').existingVnet.subnets.peSubnet.id,      '')]",
-      "existingMcpSubnetResourceId":    "[if(equals(steps('network').vnetMode, 'existing'), steps('network').existingVnet.subnets.mcpSubnet.id,     '')]",
+      "existingVnetResourceId":         "[if(equals(steps('network').vnetMode, 'existing'), steps('network').existingVnetResourceIdInput, '')]",
+      "existingAgentSubnetResourceId":  "[if(equals(steps('network').vnetMode, 'existing'), steps('network').existingAgentSubnetResourceIdInput, '')]",
+      "existingPeSubnetResourceId":     "[if(equals(steps('network').vnetMode, 'existing'), steps('network').existingPeSubnetResourceIdInput, '')]",
+      "existingMcpSubnetResourceId":    "[if(equals(steps('network').vnetMode, 'existing'), steps('network').existingMcpSubnetResourceIdInput, '')]",
 
       "existingAiSearchResourceId":             "[if(empty(steps('byo').aiSearch), '', steps('byo').aiSearch.id)]",
       "existingAzureCosmosDBAccountResourceId": "[if(empty(steps('byo').cosmos), '', steps('byo').cosmos.id)]",
