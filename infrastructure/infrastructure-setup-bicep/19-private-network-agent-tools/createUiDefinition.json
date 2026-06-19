@@ -221,10 +221,7 @@
             "name": "aiSearch",
             "type": "Microsoft.Solutions.ResourceSelector",
             "label": "Existing AI Search service (optional)",
-            "resourceType": "Microsoft.Search/searchServices",
-            "options": {
-              "filter": { "subscription": "onePerLine" }
-            }
+            "resourceType": "Microsoft.Search/searchServices"
           },
           {
             "name": "cosmos",
@@ -279,7 +276,21 @@
       "existingAiSearchResourceId":             "[if(empty(steps('byo').aiSearch), '', steps('byo').aiSearch.id)]",
       "existingAzureCosmosDBAccountResourceId": "[if(empty(steps('byo').cosmos), '', steps('byo').cosmos.id)]",
       "existingAzureStorageAccountResourceId":  "[if(empty(steps('byo').storage), '', steps('byo').storage.id)]",
-      "existingFabricWorkspaceResourceId":      "[steps('byo').fabric]"
+      "existingFabricWorkspaceResourceId":      "[steps('byo').fabric]",
+
+      "enableContainerRegistry": true,
+      "developerIpCidr": "",
+      "projectCapHost": "caphostproj",
+      "existingDnsZones": {
+        "privatelink.services.ai.azure.com": { "subscriptionId": "", "resourceGroup": "" },
+        "privatelink.openai.azure.com": { "subscriptionId": "", "resourceGroup": "" },
+        "privatelink.cognitiveservices.azure.com": { "subscriptionId": "", "resourceGroup": "" },
+        "privatelink.search.windows.net": { "subscriptionId": "", "resourceGroup": "" },
+        "privatelink.blob.core.windows.net": { "subscriptionId": "", "resourceGroup": "" },
+        "privatelink.documents.azure.com": { "subscriptionId": "", "resourceGroup": "" },
+        "privatelink.fabric.microsoft.com": { "subscriptionId": "", "resourceGroup": "" },
+        "privatelink.azurecr.io": { "subscriptionId": "", "resourceGroup": "" }
+      }
     }
   }
 }
