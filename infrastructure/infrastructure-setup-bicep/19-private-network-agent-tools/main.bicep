@@ -145,7 +145,7 @@ param existingDnsZones object = {
   'privatelink.openai.azure.com': { subscriptionId: '', resourceGroup: '' }
   'privatelink.cognitiveservices.azure.com': { subscriptionId: '', resourceGroup: '' }
   'privatelink.search.windows.net': { subscriptionId: '', resourceGroup: '' }
-  'privatelink.blob.${environment().suffixes.storage}': { subscriptionId: '', resourceGroup: '' }
+  'privatelink.blob.core.windows.net': { subscriptionId: '', resourceGroup: '' }
   'privatelink.documents.azure.com': { subscriptionId: '', resourceGroup: '' }
   'privatelink.fabric.microsoft.com': { subscriptionId: '', resourceGroup: '' }
   'privatelink.azurecr.io': { subscriptionId: '', resourceGroup: '' }
@@ -309,8 +309,6 @@ module acr 'modules-network-secured/container-registry.bicep' = if (enableContai
     acrName: acrName
     location: location
     peSubnetId: vnet.outputs.peSubnetId
-    vnetId: vnet.outputs.virtualNetworkId
-    suffix: uniqueSuffix
     existingDnsZoneResourceGroup: existingDnsZones['privatelink.azurecr.io'].resourceGroup
     dnsZonesSubscriptionId: empty(existingDnsZones['privatelink.azurecr.io'].subscriptionId) ? subscription().subscriptionId : existingDnsZones['privatelink.azurecr.io'].subscriptionId
     developerIpCidr: developerIpCidr
